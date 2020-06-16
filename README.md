@@ -11,7 +11,7 @@
 * Thymeleaf
 * lombok
 
-##기본정보
+## 기본정보
 
 서버
 > localhost:8080
@@ -21,7 +21,7 @@
 
 ## Building the project
 repository:
-> https:githun.com/
+> https://github.com/Seokjin-oh/notice.git
  
 빌드(notice/pom.xml 경로)
 > mvn package
