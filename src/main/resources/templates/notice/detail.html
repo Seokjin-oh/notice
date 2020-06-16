@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorator="layout/main">
+<head>
+    <title>공지사항</title>
+
+    <script th:inline="javascript" >
+        var noticeKey = [[${noticeKey}]];
+
+        $(document).ready(function() {
+            init(noticeKey); //최초 접속 시 실행
+        });
+
+        function init(noticeKey) {
+            gfCallServer("/notice/" + noticeKey + "/detail.json", {}, function (data) {
+                if(data.code == 1) {
+                    var notice = data.notice;
+                    if(notice == null) {
+                        alert("공지를 조회 할 수 없습니다.");
+                        fnList();
+                    }
+
+                    $("#title").text(notice.TITLE);
+                    $("#contents").html(notice.CONTENTS.replace(/\n/g, "<br />"));
+                    $("#userId").text(notice.USER_ID);
+                    $("#regDate").text(new Date(notice.REG_DATE).dateFormat("yyyy-MM-dd HH:mm"));
+                    $("#modifyDate").text(new Date(notice.UPDATE_DATE).dateFormat("yyyy-MM-dd HH:mm"));
+                    $.each(notice.files, function(index, file){
+                        $("#fileDisplay").append("<li><span>"+ file.FILE_NAME +"</span></li>");
+                    });
+                } else {
+                    alert(data.msg);
+                }
+
+            }, "GET");
+        }
+        /**
+         * 공지 수정 이동
+         */
+        function fnUpdate() {
+            location.href ='/moveMenu?view=notice/update&noticeKey='+noticeKey;
+        }
+        /**
+         * 공지 삭제
+         */
+        function fnDelete() {
+            if(!confirm("공지를 삭제하시겠습니까?")) {
+                return false;
+            }
+
+            gfCallServer("/notice/" + noticeKey, {}, function (data) {
+                if(data.code == 1) {
+                    alert("공지를 삭제했습니다.");
+                    fnList();
+                } else {
+                    alert(data.msg);
+                }
+
+            }, "DELETE");
+        }
+
+        /**
+         * 공지 목록 이동
+         */
+        function fnList() {
+            location.href ='/moveMenu?view=notice/list';
+        }
+
+
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>공지사항 상세</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">제목</label>
+                            <div class="col-sm-10">
+                                <span id="title"></span>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">내용</label>
+                            <div class="col-sm-10">
+                                <span id="contents"></span>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">작성자</label>
+                            <div class="col-sm-10">
+                                <span id="userId"></span>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">작성일</label>
+                            <div class="col-sm-10">
+                                <span id="regDate"></span>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">수정일</label>
+                            <div class="col-sm-10">
+                                <span id="modifyDate"></span>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">파일</label>
+                            <div class="col-sm-10">
+                                <ul id="fileDisplay"></ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="ibox-footer">
+                        <div class="text-center">
+                            <button class="btn btn-white" onclick="fnList()">목록</button>
+                            <button sec:authorize="hasAuthority('ADMIN')" class="btn btn-primary" onclick="fnUpdate()">수정</button>
+                            <button sec:authorize="hasAuthority('ADMIN')" class="btn btn-warning" onclick="fnDelete()">삭제</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

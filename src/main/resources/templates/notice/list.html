@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorator="layout/main">
+<head>
+    <title>공지사항</title>
+
+    <script th:inline="javascript" >
+        $(document).ready(function() {
+
+            //공지 등록
+            $("#notiReg").on("click", function(e) {
+                location.href ='/moveMenu?view=notice/reg';
+            });
+
+            init();
+        });
+
+        /**
+         * 최초 접속 시 실행
+         */
+        function init() {
+            searchNoti(1);
+        }
+
+        //table body 리스트 목록 그리기
+        function draw(list) {
+            $("#noti_body").html("");
+            if(list.length == 0 ){ //데이터 없을 경우
+                $("#noti_body").html("<tr><td>데이터가 없습니다.</td></tr>");
+            }else { // 데이터 있을 경우
+                var tBodyHtml = "";
+                $.each(list, function(i, row) { // 심사 완료 회원 정보
+                    var td = "";
+                    td += "<td>" + row.NOTICE_KEY + "</td>";
+                    td += "<td>" + row.TITLE + "</td>";
+                    td += "<td>" + new Date(row.REG_DATE).dateFormat("yyyy-MM-dd HH:mm") + "</td>";
+                    td += "<td>" + row.USER_ID + "</td>";
+                    td += "<td>" + new Date(row.UPDATE_DATE).dateFormat("yyyy-MM-dd HH:mm") + "</td>";
+                    td += "<td><a href='/moveMenu?view=notice/detail&noticeKey=" + row.NOTICE_KEY + "'>" + row.CONTENTS + "</a></td>";
+
+                    tBodyHtml += "<tr>" +td + "</tr>";
+                });
+
+                $("#noti_body").html(tBodyHtml);
+            }
+
+        }
+
+        //공지 조회
+        function searchNoti(pageNo) {
+            gfCallServer("/notice/list.json", {"pageNo": pageNo}, function (data) {
+                var rowCount = 10;
+                var list = data.notiList;
+                draw(list);
+
+                var totalCount = data.notiTotalCount;
+                $("#labelRow").text(list.length);
+                $("#totalCount").text(totalCount);
+                $("#pageNo").val(pageNo);
+
+                //paging
+                var page_viewList = Paging(totalCount, rowCount, pageNo, "searchNoti");
+                $("#pagination").empty().html(page_viewList);
+
+            }, "GET");
+        }
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <input type="hidden" id="pageNo" name="pageNo" value="1">
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>공지사항 목록</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-sm-12 float-right">
+                <div class="float-right m-b-xs">
+                    <button sec:authorize="hasAuthority('ADMIN')" type="button" class="btn btn-info" id="notiReg">공지 등록</button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-content">
+                        <table class="table table-stripped">
+                            <thead>
+                            <tr>
+                                <th>NO</th>
+                                <th>제목</th>
+                                <th>작성일</th>
+                                <th>작성자</th>
+                                <th>최종수정일</th>
+                                <th>내용</th>
+                            </tr>
+                            </thead>
+                            <tbody id="noti_body">
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <td colspan="10">
+                                <ul id="pagination" class="pagination float-right"></ul>
+                                </td>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

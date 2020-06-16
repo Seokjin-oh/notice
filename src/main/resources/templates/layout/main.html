@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko" 
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+<head>
+	<meta charset="utf-8">
+	<title>Insert title here</title>
+
+	<script src="/resources/js/jquery-3.4.1.js"></script>
+	<link rel="stylesheet" th:href="@{/resources/css/bootstrap.css}">
+	<link rel="stylesheet" th:href="@{/resources/css/style.css}">
+
+	<script th:src="@{/resources/js/common.js}"></script>
+	<script th:src="@{/resources/js/bootstrap.js}"></script>
+	<script th:src="@{/resources/js/date.format.js}"></script>
+
+</head>
+<body>
+	<div id="wrapper">
+		<div id="page-wrapper" style="width: 100%" class="gray-bg">
+			<!-- body 태그 내부의 header 를 담당하는 부분이다. -->
+			<div th:replace="layout/header :: headerFragment"></div>
+			
+			<!-- 아래 div가 컨트롤러에 의해 교체되는 content 영역이다. -->
+			<div layout:fragment="content"></div>
+
+		</div>
+	</div>
+</body>
+</html>

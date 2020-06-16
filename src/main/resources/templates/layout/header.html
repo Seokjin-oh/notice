@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko" 
+	xmlns:th="http://www.thymeleaf.org"
+	  xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+
+<div class="row border-bottom" th:fragment="headerFragment">
+	<nav class="navbar" role="navigation">
+		<ul class="nav navbar-top-links">
+		    <li>
+				<span class="m-r-sm text-muted welcome-message" sec:authentication="name">Username</span>님 접속중
+		    </li>
+		    <li>
+				<form action="/logout" method="POST">
+					<button class="navbar-toggler" type="submit">LOGOUT</button>
+				</form>
+		    </li>
+		</ul>
+
+	</nav>
+</div>
+</html>

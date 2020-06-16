@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="layout/main">
+<head>
+    <title>공지사항</title>
+    <style>
+        /**
+        파일 관련 스타일
+         */
+        .fileinput {
+            margin-bottom: 9px;
+            display: inline-block;
+        }
+
+        .fileinput-new .fileinput-exists {
+            display: none;
+        }
+
+        .btn-file>input {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 0;
+            opacity: 0;
+            filter: alpha(opacity=0);
+            font-size: 23px;
+            width: 100%;
+            direction: ltr;
+            cursor: pointer;
+        }
+
+        .close {
+            float: right;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1;
+            color: #000;
+            text-shadow: 0 1px 0 #fff;
+            opacity: .5;
+        }
+    </style>
+    <script th:inline="javascript" >
+        var files = new Array(); //file 저장
+
+        $(document).ready(function() {
+            /**
+             * 파일 추가
+             */
+            $("#files").on("change", function(e){
+                $.each($("#files")[0].files, function(index, file){
+                    files.push(file);
+                    var index = files.length -1;
+                    $("#fileDisplay").append("<li><span>"+ file.name +"</span><a class='close' onclick='fnFileRemove(\""+ file.name +"\")'>x</a></li>");
+                });
+            });
+
+        });
+
+        /**
+         * 공지사항 등록
+         */
+        function fnSave() {
+
+            var title = $("#title").val().trim(); //캠페인 명
+            if(title == "") {
+                alert("제목 입력 해 주세요.");
+                $("#title").focus();
+                return false;
+            }
+
+            var contents = $("#contents").val().trim(); //캠페인 명
+            if(contents == "") {
+                alert("내용 입력 해 주세요.");
+                $("#contents").focus();
+                return false;
+            }
+
+            var url = "/notice/reg.json";
+            var data = {
+                "title": title,
+                "contents": contents,
+                "files" : files
+            };
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("contents", contents);
+            $.each(files, function (index, file) {
+                formData.append("files", file);
+            });
+
+            gfAjaxCallWithMultipartForm(url, formData, function(data) {
+                if(data.code == "1") {
+                    location.href ='/moveMenu?view=notice/detail&noticeKey='+ data.noticeKey;
+                } else {
+                    alert(data.msg);
+                }
+            }, "POST");
+        }
+
+        /**
+         * 취소
+         */
+        function fnCancel() {
+            location.href ='/moveMenu?view=notice/list';
+        }
+
+        /**
+         * file 삭제
+         */
+        function fnFileRemove(fileName) {
+            files.splice(files.findIndex(f => f.name === fileName),1); // 이름으로 file삭제
+            $("#fileDisplay").html(""); //ul 에 있는 li 삭제
+            $.each(files, function(index, file){ //files 있는 파일 다시 그려주기
+                $("#fileDisplay").append("<li><span>"+ file.name +"</span><a class='close' onclick='fnFileRemove(\""+ file.name +"\")'>x</a></li>");
+            });
+        }
+
+    </script>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>공지사항 등록</h2>
+        </div>
+    </div>
+
+    <div class="wrapper wrapper-content">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">제목</label>
+                            <div class="col-sm-10">
+                                <input type="text" id="title" name="title" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">내용</label>
+                            <div class="col-sm-10">
+                                <textarea id="contents" name="contents" class="form-control"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="hr-line-dashed"></div>
+
+                        <div class="form-group  row">
+                            <label class="col-sm-2 col-form-label">파일</label>
+                            <div class="col-sm-10">
+                                <div class="col-sm-2 fileinput fileinput-new" data-provides="fileinput">
+                                    <span class="btn btn-default btn-file">
+                                        <span class="fileinput-new">Select file</span>
+                                        <input type="file" id="files" name="files" multiple/>
+                                    </span>
+                                </div>
+                                <ul id="fileDisplay"></ul>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="ibox-footer">
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="fnSave()">저장</button>
+                            <button class="btn btn-white" onclick="fnCancel()">취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.board.notice.mapper.NoticeMapper">
+
+    <!-- 공지사항 목록 총 갯수 -->
+    <select id="findCount" parameterType="hashmap" resultType="int">
+        SELECT
+            COUNT(NOTICE_KEY)
+        FROM
+            NOTICE_TB NT
+	</select>
+
+    <!-- 공지사항 목록 -->
+    <select id="findAll" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            NT.NOTICE_KEY,
+            NT.TITLE,
+            NT.CONTENTS,
+            NT.REG_DATE,
+            NT.UPDATE_DATE,
+            UT.USER_ID
+        FROM
+            NOTICE_TB NT
+            LEFT JOIN USER_TB UT ON NT.USER_KEY = UT.USER_KEY
+        ORDER BY NT.NOTICE_KEY DESC
+		LIMIT
+			${offset}, 10
+	</select>
+
+    <!-- 공지사항 상세 -->
+    <select id="findOne" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            NT.NOTICE_KEY,
+            NT.TITLE,
+            NT.CONTENTS,
+            NT.REG_DATE,
+            NT.UPDATE_DATE,
+            UT.USER_ID
+        FROM
+            NOTICE_TB NT
+            LEFT JOIN USER_TB UT ON NT.USER_KEY = UT.USER_KEY
+        WHERE
+            NT.NOTICE_KEY = #{noticeKey}
+        ORDER BY NT.NOTICE_KEY DESC
+
+    </select>
+
+    <!-- 공지사항 파일 목록 -->
+    <select id="findAllByFile" parameterType="hashmap" resultType="hashmap">
+        SELECT
+            NOTICE_FILE_KEY,
+            NOTICE_KEY,
+            FILE_NAME,
+            PATH,
+            REG_DATE
+        FROM
+            NOTICE_FILE_TB
+        WHERE
+            NOTICE_KEY = #{noticeKey}
+        ORDER BY NOTICE_FILE_KEY ASC
+
+    </select>
+
+    <!-- 공지사항 등록 -->
+    <insert id="saveNotice" parameterType="hashmap" useGeneratedKeys="true" keyProperty="NOTICE_KEY">
+        INSERT INTO NOTICE_TB (TITLE, CONTENTS, USER_KEY, REG_DATE, UPDATE_DATE)
+        VALUES (#{title}, #{contents}, #{userKey}, CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
+    </insert>
+
+    <!-- 공지사항 첨부파일 등록 -->
+    <insert id="saveNoticeFilePath" parameterType="hashmap">
+        INSERT INTO NOTICE_FILE_TB (NOTICE_KEY, FILE_NAME, PATH, REG_DATE)
+        VALUES (#{noticeKey}, #{fileName}, #{path}, CURRENT_TIMESTAMP())
+    </insert>
+
+    <!-- 공지사항 수정 -->
+    <update id="updateNotice" parameterType="hashmap">
+        UPDATE NOTICE_TB
+        SET
+            TITLE = #{title}
+            ,CONTENTS = #{contents}
+            ,USER_KEY = #{userKey}
+            ,UPDATE_DATE = CURRENT_TIMESTAMP()
+        WHERE
+            NOTICE_KEY = #{noticeKey}
+    </update>
+
+    <!-- 공지사항 첨부파일 삭제 -->
+    <delete id="deleteNoticeFilePath" parameterType="hashmap">
+        DELETE FROM NOTICE_FILE_TB
+        WHERE
+            NOTICE_FILE_KEY IN (
+                <foreach collection="noticeFileKeys" item="noticeFileKey" separator=" , ">
+                    #{noticeFileKey}
+                </foreach>
+            )
+
+    </delete>
+
+    <!-- 공지사항 삭제 -->
+    <delete id="deleteNotice" parameterType="hashmap" >
+        DELETE FROM NOTICE_TB
+        WHERE
+            NOTICE_KEY = #{noticeKey}
+        AND
+            USER_KEY = #{userKey}
+    </delete>
+
+    <!-- 공지사항 첨부파일 삭제 -->
+    <delete id="deleteAllNoticeFile" parameterType="hashmap" >
+        DELETE FROM NOTICE_FILE_TB
+        WHERE
+            NOTICE_KEY = #{noticeKey}
+    </delete>
+</mapper>
+

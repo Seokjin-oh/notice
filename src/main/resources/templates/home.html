@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/web/thymeleaf/layout"
+      layout:decorator="layout/main">
+<head>
+    <script th:inline="javascript" >
+        function redirectMove() {
+            location.href ='/moveMenu?view=notice/list';
+        }
+    </script>
+</head>
+<body onload="redirectMove()">
+<div layout:fragment="content">
+    <h1>HOME</h1>
+</div>
+</body>
+</html>
