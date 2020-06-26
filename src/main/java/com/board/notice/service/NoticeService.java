@@ -72,7 +72,7 @@ public class NoticeService {
      * @return the int
      * @throws Exception the exception
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int addNotice(int userKey, String title, String contents, MultipartFile[] files) throws Exception {
         List<Map<String, Object>> fileMapList = new ArrayList<>();
 
@@ -110,7 +110,7 @@ public class NoticeService {
      * @return int
      * @throws Exception the exception
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int modifyNotice(int noticeKey, int userKey, String title, String contents, int[] removeFileKey, MultipartFile[] files) throws Exception {
         List<Map<String, Object>> fileMapList = new ArrayList<>();
 
@@ -129,7 +129,10 @@ public class NoticeService {
         noticeMapper.updateNotice(param);
 
         //기존 첨부 파일 삭제 처리
+        //noticeMapper.deleteNoticeFilePath(removeFileKey);
         noticeMapper.deleteNoticeFilePath(removeFileKey);
+
+
 
         //새로운 첨부 파일 저장
         for (Map<String, Object> fileMap : fileMapList) {
